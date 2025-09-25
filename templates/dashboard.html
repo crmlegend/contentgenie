@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Tailwind config for a nicer neutral palette
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+              400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+              800: '#3730a3', 900: '#312e81'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .hover-card{ transition: transform .15s ease, box-shadow .15s ease; }
+    .hover-card:hover{ transform: translateY(-2px); }
+    .focus-ring{ outline: none; box-shadow: 0 0 0 2px rgba(99,102,241,.6); }
+    /* Hide scrollbars in sidebar on Windows but allow scroll */
+    .nice-scroll{ scrollbar-width: thin; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+  <div class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="hidden md:flex md:w-64 lg:w-72 flex-col border-r border-slate-200 bg-white">
+      <div class="h-16 px-6 flex items-center gap-3 border-b border-slate-100">
+        <div class="h-9 w-9 rounded-2xl bg-brand-600 text-white grid place-items-center font-semibold shadow-sm">☕</div>
+        <div>
+          <div class="text-sm font-semibold">ContentGenie</div>
+          <div class="text-xs text-slate-500">User Console</div>
+        </div>
+      </div>
+      <nav class="flex-1 overflow-y-auto nice-scroll px-3 py-4 space-y-1">
+        <a href="#" class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium bg-slate-100 text-slate-900">
+          <span class="inline-flex h-5 w-5 items-center justify-center">
+            <!-- home icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10.5 12 3l9 7.5M5 10.5V20a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-9.5"/></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="#api" class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">
+          <span class="inline-flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16"/></svg>
+          </span>
+          API
+        </a>
+        <a href="#billing" class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">
+          <span class="inline-flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 7h18M3 11h18M7 15h10M5 19h14"/></svg>
+          </span>
+          Billing
+        </a>
+        <a href="#settings" class="group flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">
+          <span class="inline-flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M10.5 4.5h3M4.5 13.5a7.5 7.5 0 1 0 15 0a7.5 7.5 0 1 0-15 0Z"/></svg>
+          </span>
+          Settings
+        </a>
+      </nav>
+      <div class="px-4 py-4 border-t border-slate-100">
+        <div class="text-xs text-slate-500">Signed in as</div>
+        <div class="text-sm font-medium truncate">{{ request.user.email }}</div>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <div class="flex-1 min-w-0">
+      <!-- Topbar (mobile) -->
+      <div class="md:hidden sticky top-0 z-10 bg-white border-b border-slate-200">
+        <div class="h-14 px-4 flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <button class="p-2 rounded-lg border border-slate-200" onclick="document.getElementById('mobileDrawer').classList.remove('hidden')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+            <span class="font-semibold">Dashboard</span>
+          </div>
+          <div class="text-sm">{{ request.user.email }}</div>
+        </div>
+      </div>
+
+      <!-- Main content area -->
+      <main class="px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page header -->
+        <div class="flex items-center justify-between gap-4">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Dashboard</h1>
+            <p class="text-slate-500 mt-1">Manage your profile, subscription, and API access.</p>
+          </div>
+          <div class="hidden sm:flex items-center gap-2">
+            <form method="post" action="{% url 'logout' %}">
+              {% csrf_token %}
+              <button type="submit"
+                      class="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                Logout
+              </button>
+            </form>
+          </div>
+          
+        </div>
+
+        <!-- KPI cards -->
+        <section class="mt-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <div class="hover-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Plan</div>
+            <div class="mt-2 text-xl font-semibold">{% if key %}{{ key.plan|default:'pro'|title }}{% else %}Free{% endif %}</div>
+          </div>
+          <div class="hover-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">API Key</div>
+            <div class="mt-2 text-xl font-semibold">{% if key %}Active{% else %}None{% endif %}</div>
+          </div>
+          <div class="hover-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Status</div>
+            <div class="mt-2 text-xl font-semibold">Authenticated</div>
+          </div>
+          <div class="hover-card rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div class="text-sm text-slate-500">Last Login</div>
+            <div class="mt-2 text-xl font-semibold">{{ request.user.last_login|date:"M d, Y" }}</div>
+          </div>
+        </section>
+
+        <!-- Two-column layout -->
+        <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <!-- Profile & Billing -->
+          <section id="settings" class="lg:col-span-2 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover-card">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-semibold">Profile & Security</h2>
+              <span class="text-xs text-slate-500">User ID: {{ request.user.id }}</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">Update your username or change your password. Passwords are never shown — only changed.</p>
+          
+            <!-- Username -->
+            <form method="post" class="space-y-4 mt-5" id="profileForm">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="update_profile" />
+              <div>
+                <label class="block text-sm font-medium text-slate-700 mb-1">Username</label>
+                {{ profile_form.username }}
+                <p class="text-xs text-slate-400 mt-1">Your login name shown across the app.</p>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" id="enableProfile"
+                        class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                  Change
+                </button>
+                <button type="submit" id="saveProfile"
+                        class="inline-flex items-center rounded-xl bg-indigo-600 text-white px-3 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
+                        disabled>
+                  Save changes
+                </button>
+              </div>
+            </form>
+          
+            <hr class="my-6">
+          
+            <!-- Password (masked) -->
+            <form method="post" class="space-y-4" id="passwordForm">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="change_password" />
+              <div class="grid md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Current password</label>
+                  {{ pwd_form.old_password }}
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">New password</label>
+                  {{ pwd_form.new_password1 }}
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-slate-700 mb-1">Confirm new password</label>
+                  {{ pwd_form.new_password2 }}
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button type="button" id="enablePassword"
+                        class="inline-flex items-center rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                  Change
+                </button>
+                <button type="submit" id="savePassword"
+                        class="inline-flex items-center rounded-xl bg-indigo-600 text-white px-3 py-2 text-sm font-medium hover:bg-indigo-700 disabled:opacity-60"
+                        disabled>
+                  Save changes
+                </button>
+              </div>
+            </form>
+          
+            <p class="mt-6 text-xs text-slate-500">Tip: Use a strong password and rotate your API key if it’s ever exposed.</p>
+          </section>
+          
+          <!-- API & Subscription -->
+          <!-- API & Subscription -->
+<section id="api" class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm hover-card">
+    <h2 class="text-lg font-semibold">API Access</h2>
+    <p class="text-sm text-slate-500 mt-1">Your latest active key (prefix only for safety).</p>
+
+    <div class="mt-4 space-y-3">
+        {% if latest_key_prefix %}
+            <!-- Display the Key Prefix if available -->
+            <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div class="text-sm text-slate-500 mb-1">Key Prefix</div>
+                <div class="flex items-center gap-2">
+                    <code id="keyPrefix" class="text-sm bg-white rounded-lg px-2 py-1 border border-slate-200">{{ latest_key_prefix }}</code>
+                    <button type="button" class="text-xs rounded-lg border border-slate-300 px-2 py-1 hover:bg-slate-100" onclick="copyPrefix()">Copy</button>
+                </div>
+            </div>
+        {% else %}
+            <!-- Display message when no key is found -->
+            <div class="rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <p class="text-sm text-amber-700">No active key.</p>
+            </div>
+        {% endif %}
+    </div>
+
+    <div id="billing" class="mt-5 border-t border-slate-100 pt-5">
+        <h3 class="text-sm font-semibold text-slate-700">Subscription</h3>
+        <p class="text-sm text-slate-500 mt-1">Start or manage your subscription to get/renew your API key.</p>
+        <button id="subscribeBtn" onclick="subscribe()" class="mt-3 inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-60">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-4 w-4"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 5v14m7-7H5"/></svg>
+            Subscribe
+        </button>
+        <p id="subError" class="hidden mt-2 text-sm text-rose-600"></p>
+    </div>
+</section>
+
+
+        <!-- Help/Note -->
+        <div class="mt-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div class="flex items-start gap-3">
+            <div class="mt-0.5 text-brand-600">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 9v4m0 4h.01M12 3a9 9 0 1 0 0 18a9 9 0 0 0 0-18Z"/></svg>
+            </div>
+            <div>
+              <div class="text-sm font-semibold">Security tip</div>
+              <p class="text-sm text-slate-600 mt-0.5">We never show full API keys here. Store your key securely and rotate it if you believe it was exposed.</p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Mobile drawer -->
+  <div id="mobileDrawer" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/40" onclick="this.parentElement.classList.add('hidden')"></div>
+    <div class="absolute left-0 top-0 bottom-0 w-72 bg-white border-r border-slate-200 p-4">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <div class="h-8 w-8 rounded-xl bg-brand-600 text-white grid place-items-center font-semibold">☕</div>
+          <div class="text-sm font-semibold">ContentGenie</div>
+        </div>
+        <button class="p-2 rounded-lg border border-slate-200" onclick="document.getElementById('mobileDrawer').classList.add('hidden')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M6 18 18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <nav class="space-y-1">
+        <a href="#" class="block px-3 py-2 rounded-xl text-sm font-medium bg-slate-100">Dashboard</a>
+        <a href="#api" class="block px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">API</a>
+        <a href="#billing" class="block px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">Billing</a>
+        <a href="#settings" class="block px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50">Settings</a>
+      </nav>
+      <div class="mt-6 text-xs text-slate-500">{{ request.user.email }}</div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 hidden">
+    <div class="rounded-xl bg-slate-900 text-white text-sm px-4 py-3 shadow-lg">Copied to clipboard</div>
+  </div>
+
+
+
+  <script>
+    // Enable/disable logic for username + password forms
+    (function () {
+      // Username
+      const uname = document.querySelector('#profileForm input[name="username"]');
+      const saveProfile = document.getElementById('saveProfile');
+      const enableProfile = document.getElementById('enableProfile');
+      if (uname) {
+        uname.setAttribute('disabled', 'disabled');
+        enableProfile.addEventListener('click', () => {
+          uname.removeAttribute('disabled');
+          uname.focus();
+          saveProfile.removeAttribute('disabled');
+        });
+      }
+  
+      // Passwords
+      const pwOld = document.getElementById('{{ pwd_form.old_password.id_for_label }}');
+      const pw1   = document.getElementById('{{ pwd_form.new_password1.id_for_label }}');
+      const pw2   = document.getElementById('{{ pwd_form.new_password2.id_for_label }}');
+      const enablePassword = document.getElementById('enablePassword');
+      const savePassword   = document.getElementById('savePassword');
+  
+      [pwOld, pw1, pw2].forEach(el => el && el.setAttribute('disabled','disabled'));
+      enablePassword.addEventListener('click', () => {
+        [pwOld, pw1, pw2].forEach(el => el && el.removeAttribute('disabled'));
+        pwOld && pwOld.focus();
+        savePassword.removeAttribute('disabled');
+      });
+    })();
+  </script>
+  
+  <script>
+    async function subscribe(){
+      const btn = document.getElementById('subscribeBtn');
+      const err = document.getElementById('subError');
+      err.classList.add('hidden'); err.textContent = '';
+      const original = btn.textContent;
+      btn.textContent = 'Creating checkout...';
+      btn.disabled = true;
+
+      try {
+        const r = await fetch('/billing/start/', {
+          method:'POST',
+          headers:{ 'Authorization': 'Bearer {{ access }}' }
+        });
+
+        if(!r.ok){
+          let msg = 'Failed to start checkout';
+          try { const j = await r.json(); if(j && j.detail) msg = j.detail; } catch(e){}
+          throw new Error(msg + ' (' + r.status + ')');
+        }
+
+        const j = await r.json();
+        if(!j.url){ throw new Error('No checkout URL returned'); }
+        location.href = j.url;
+      } catch(e){
+        err.textContent = e.message || 'Something went wrong';
+        err.classList.remove('hidden');
+      } finally {
+        btn.textContent = original;
+        btn.disabled = false;
+      }
+    }
+
+    function copyPrefix(){
+      const el = document.getElementById('keyPrefix');
+      if(!el) return;
+      const text = el.textContent.trim();
+      navigator.clipboard.writeText(text).then(showToast);
+    }
+
+    function showToast(){
+      const t = document.getElementById('toast');
+      t.classList.remove('hidden');
+      setTimeout(()=> t.classList.add('hidden'), 1400);
+    }
+  </script>
+</body>
+</html>

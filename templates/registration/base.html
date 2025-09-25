@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}Django App{% endblock %}</title>
+
+    <!-- Tailwind (CDN, great for dev) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Optional: Tailwind config (adjust font/brand color if you want) -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: '#4f46e5' /* indigo-600 */
+            }
+          }
+        }
+      }
+    </script>
+  </head>
+  <body class="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      {% if messages %}
+        <div class="space-y-2 mb-4">
+          {% for message in messages %}
+            <div class="text-sm rounded-lg px-3 py-2
+                        {% if message.tags == 'error' %}
+                          bg-red-50 text-red-700 border border-red-200
+                        {% elif message.tags == 'success' %}
+                          bg-green-50 text-green-700 border border-green-200
+                        {% else %}
+                          bg-blue-50 text-blue-700 border border-blue-200
+                        {% endif %}">
+              {{ message }}
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- tiny helper for show/hide password -->
+    <script>
+      function togglePassword(id, btnId){
+        const input = document.getElementById(id);
+        const btn = document.getElementById(btnId);
+        if (!input) return;
+        input.type = input.type === "password" ? "text" : "password";
+        if (btn) btn.textContent = (input.type === "password") ? "Show" : "Hide";
+      }
+    </script>
+    
+  </body>
+</html>

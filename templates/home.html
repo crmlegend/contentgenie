@@ -1,0 +1,220 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Get your API key · YourApp</title>
+
+  <!-- Tailwind via CDN (or replace with your compiled CSS) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 600: '#4F46E5', 700: '#4338CA' } /* indigo-ish */
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="antialiased text-slate-900 bg-white">
+
+  <!-- FULL-WIDTH NAV -->
+  <header class="sticky top-0 z-40 w-full bg-white/80 backdrop-blur border-b border-slate-100">
+    <div class="px-5 lg:px-10 w-full flex items-center justify-between h-16">
+      <a href="/" class="flex items-center gap-2">
+        <div class="h-9 w-9 rounded-xl bg-brand-600 text-white grid place-items-center font-bold">YA</div>
+        <span class="text-lg font-semibold">YourApp</span>
+      </a>
+      <nav class="hidden md:flex items-center gap-7 text-sm">
+        <a href="#features" class="text-slate-600 hover:text-slate-900">Features</a>
+        <a href="#pricing"  class="text-slate-600 hover:text-slate-900">Pricing</a>
+        <a href="#faq"      class="text-slate-600 hover:text-slate-900">FAQ</a>
+
+        {% if request.user.is_authenticated %}
+          <a href="{% url 'dashboard' %}" class="rounded-xl bg-slate-900 text-white px-4 py-2 font-medium hover:bg-black/90">
+            Dashboard
+          </a>
+        {% else %}
+          <a href="{% url 'login' %}" class="text-slate-700 hover:text-slate-900">Log in</a>
+          <a href="{% url 'login' %}?next=/dashboard/"
+             class="rounded-xl bg-brand-600 text-white px-4 py-2 font-medium hover:bg-brand-700">
+            Subscribe
+          </a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- FULL-WIDTH HERO (no max-w) -->
+  <section class="relative w-full overflow-hidden">
+    <div class="absolute inset-0 -z-10 bg-gradient-to-b from-white via-white to-indigo-50/40"></div>
+
+    <div class="grid lg:grid-cols-2 gap-10 items-center px-5 sm:px-8 lg:px-12 xl:px-20 py-14 lg:py-24">
+      <div>
+        <div class="inline-flex items-center gap-2 rounded-full bg-indigo-50 text-indigo-700 px-3 py-1 text-xs font-medium mb-6">
+          <span>API-first</span><span>•</span><span>Secure</span><span>•</span><span>Fast</span>
+        </div>
+        <h1 class="text-[40px] sm:text-[56px] lg:text-[72px] leading-[1.05] font-extrabold tracking-tight">
+          Get your <span class="block">API key</span>
+          <span class="block">and start in</span> minutes
+        </h1>
+        <p class="mt-6 text-lg text-slate-600 max-w-2xl">
+          Pick a plan and subscribe—your key is provisioned instantly. Upgrade, cancel, or manage billing at any time.
+        </p>
+
+        {% if request.user.is_authenticated %}
+          <div class="mt-8 flex items-center gap-3">
+            <a href="{% url 'dashboard' %}"
+               class="inline-flex items-center justify-center rounded-xl bg-brand-600 text-white px-6 py-3 font-medium hover:bg-brand-700">
+              Go to dashboard
+            </a>
+            <span class="text-sm text-slate-500">Signed in as <strong>{{ request.user.username }}</strong></span>
+          </div>
+        {% else %}
+          <div class="mt-8 flex items-center gap-3">
+            <a href="{% url 'login' %}?next=/dashboard/"
+               class="inline-flex items-center justify-center rounded-xl bg-brand-600 text-white px-6 py-3 font-medium hover:bg-brand-700">
+              Subscribe
+            </a>
+            <a href="{% url 'login' %}"
+               class="inline-flex items-center justify-center rounded-xl border border-slate-300 px-6 py-3 font-medium text-slate-700 hover:bg-slate-50">
+              Log in
+            </a>
+          </div>
+          <p class="mt-2 text-sm text-slate-500">You’ll log in first, then we’ll send you to your dashboard.</p>
+        {% endif %}
+      </div>
+
+      <!-- Visual card, centered on large screens -->
+      <div class="w-full">
+        <div class="mx-auto w-full max-w-md rounded-2xl bg-white shadow-[0_30px_80px_-20px_rgba(2,6,23,0.1)] ring-1 ring-slate-100 p-6">
+          <div class="grid grid-cols-2 gap-4">
+            <div class="rounded-xl border border-slate-200 p-4">
+              <p class="text-xs text-slate-500">Requests</p>
+              <p class="text-2xl font-semibold">1M</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <p class="text-xs text-slate-500">Latency</p>
+              <p class="text-2xl font-semibold">~80ms</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <p class="text-xs text-slate-500">Uptime</p>
+              <p class="text-2xl font-semibold">99.9%</p>
+            </div>
+            <div class="rounded-xl border border-slate-200 p-4">
+              <p class="text-xs text-slate-500">Regions</p>
+              <p class="text-2xl font-semibold">3+</p>
+            </div>
+          </div>
+          <div class="mt-6 rounded-xl bg-slate-50 p-4">
+            <p class="text-xs text-slate-500 mb-2">Your API key (example)</p>
+            <code class="block text-sm bg-white border border-slate-200 rounded-lg p-3 text-slate-800 overflow-x-auto">
+              sk_live_********************************
+            </code>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FULL-WIDTH FEATURES -->
+  <section id="features" class="px-5 sm:px-8 lg:px-12 xl:px-20 py-20">
+    <h2 class="text-3xl font-bold mb-6">Everything you need</h2>
+    <p class="text-slate-600 mb-10">Production-ready from day one.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="rounded-2xl border border-slate-200 p-6 bg-white">
+        <div class="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-700 grid place-items-center mb-4">⚡</div>
+        <h3 class="font-semibold mb-1">Fast & scalable</h3>
+        <p class="text-slate-600 text-sm">Low latency and horizontal scaling built in.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 p-6 bg-white">
+        <div class="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-700 grid place-items-center mb-4">🔐</div>
+        <h3 class="font-semibold mb-1">Secure by default</h3>
+        <p class="text-slate-600 text-sm">Scoped keys, OAuth, and audit logs for peace of mind.</p>
+      </div>
+      <div class="rounded-2xl border border-slate-200 p-6 bg-white">
+        <div class="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-700 grid place-items-center mb-4">🧰</div>
+        <h3 class="font-semibold mb-1">Developer friendly</h3>
+        <p class="text-slate-600 text-sm">Clear docs, SDKs, and examples to ship faster.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FULL-WIDTH PRICING TEASER -->
+  <section id="pricing" class="px-5 sm:px-8 lg:px-12 xl:px-20 pb-24">
+    <h2 class="text-3xl font-bold mb-6">Simple pricing</h2>
+    <p class="text-slate-600 mb-10">Start small, scale when you need.</p>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="font-semibold">Starter</h3>
+        <p class="mt-2 text-3xl font-extrabold">$9<span class="text-base text-slate-500">/mo</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+          <li>✔ 50k requests</li>
+          <li>✔ Email support</li>
+        </ul>
+        <div class="mt-6">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Go to dashboard</a>
+          {% else %}
+            <a href="{% url 'login' %}?next=/dashboard/" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Subscribe</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="rounded-2xl border-2 border-brand-600 bg-white p-6 shadow-lg">
+        <div class="inline-flex items-center gap-2 text-xs font-medium text-brand-600 bg-indigo-50 px-2 py-1 rounded-full">Popular</div>
+        <h3 class="mt-2 font-semibold">Pro</h3>
+        <p class="mt-2 text-3xl font-extrabold">$29<span class="text-base text-slate-500">/mo</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+          <li>✔ 500k requests</li>
+          <li>✔ Priority support</li>
+          <li>✔ Billing portal</li>
+        </ul>
+        <div class="mt-6">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Go to dashboard</a>
+          {% else %}
+            <a href="{% url 'login' %}?next=/dashboard/" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Subscribe</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="rounded-2xl border border-slate-200 bg-white p-6">
+        <h3 class="font-semibold">Business</h3>
+        <p class="mt-2 text-3xl font-extrabold">$99<span class="text-base text-slate-500">/mo</span></p>
+        <ul class="mt-4 space-y-2 text-sm text-slate-600">
+          <li>✔ 2M requests</li>
+          <li>✔ SLA & SSO</li>
+          <li>✔ Dedicated support</li>
+        </ul>
+        <div class="mt-6">
+          {% if request.user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Contact sales</a>
+          {% else %}
+            <a href="{% url 'login' %}?next=/dashboard/" class="w-full inline-flex justify-center rounded-xl bg-brand-600 text-white px-4 py-2.5 font-medium hover:bg-brand-700">Subscribe</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="w-full border-t border-slate-200 py-8">
+    <div class="px-5 sm:px-8 lg:px-12 xl:px-20 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-slate-500">
+      <p>© {{ now|default:2025 }} YourApp. All rights reserved.</p>
+      <div class="flex items-center gap-4">
+        <a href="#" class="hover:text-slate-700">Docs</a>
+        <a href="#" class="hover:text-slate-700">Status</a>
+        <a href="#" class="hover:text-slate-700">Privacy</a>
+        <a href="#" class="hover:text-slate-700">Terms</a>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
