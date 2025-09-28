@@ -6,30 +6,24 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# --- Security ---
-
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+# --- Security & env (single source of truth) ---
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "devsecret")  # local fallback only
 DEBUG = os.getenv("DEBUG", "0") == "1"
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN")
-TEST_KEY = os.getenv("TEST_KEY")
-JWT_ISS = os.getenv("JWT_ISS")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+
+ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
+TEST_KEY = os.getenv("TEST_KEY", "")
+JWT_ISS = os.getenv("JWT_ISS", "")
 
 # Stripe keys
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
-STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET")
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID", "")
+STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
 # API keys
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-SECRET_KEY = os.getenv("SECRET_KEY")
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-DEBUG = os.getenv("DEBUG", "False") == "True"
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "devsecret")
-DEBUG = os.getenv("DEBUG", "0") == "1"
-ALLOWED_HOSTS = ["*"]  # tighten in prod
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
 
 # --- Apps ---
 INSTALLED_APPS = [
@@ -48,10 +42,11 @@ INSTALLED_APPS = [
     "content",
 ]
 
-# --- Middleware (corsheaders FIRST) ---
+# --- Middleware (order matters) ---
 MIDDLEWARE = [
-    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",   # serve static files
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -60,41 +55,21 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "core.urls"
-
-TEMPLATES = [
-    {
-        "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
-        "APP_DIRS": True,
-        "OPTIONS": {
-            "context_processors": [
-                "django.template.context_processors.debug",
-                "django.template.context_processors.request",
-                "django.contrib.auth.context_processors.auth",
-                "django.contrib.messages.context_processors.messages",
-            ],
-        },
-    },
-]
-
 WSGI_APPLICATION = "core.wsgi.application"
 
-# --- DB ---
+# --- Database (SQLite on persistent path) ---
+# On Azure set SQLITE_PATH=/home/data/app.db so redeploys don't wipe data
+SQLITE_PATH = os.getenv("SQLITE_PATH", str(BASE_DIR / "db.sqlite3"))
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {
-            "timeout": 20,  # seconds
-        },
+        "NAME": SQLITE_PATH,
+        "OPTIONS": {"timeout": 20},
     }
 }
 
-
 # --- Auth ---
-# Must be set BEFORE first migrate
 AUTH_USER_MODEL = "accounts.User"
-
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -108,30 +83,35 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# --- Static ---
-STATIC_URL = "static/"
+# --- Static (WhiteNoise) ---
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+# --- (Optional) Media uploads ---
+# For small apps you can start like this; later move to Azure Blob Storage.
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.getenv("MEDIA_ROOT", "/home/data/media")
+
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# --- CORS ---
+# --- CORS / CSRF ---
 CORS_ALLOW_ALL_ORIGINS = True
-# In prod prefer:
-# CORS_ALLOWED_ORIGINS = ["https://your-php-site.tld"]
+# In production, prefer allow-list:
+# CORS_ALLOWED_ORIGINS = ["https://yourappname.azurewebsites.net"]
 
-# --- Integrations (from .env) ---
-STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
-STRIPE_PRICE_ID = os.getenv("STRIPE_PRICE_ID", "")
-STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
-TEST_KEY = os.getenv("TEST_KEY", "abcdef")
-
-ENV_OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
-ENV_GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+CSRF_TRUSTED_ORIGINS = [
+    # add your Azure site below after deploy:
+    # "https://yourappname.azurewebsites.net",
+    "https://cd3e7c147fe3.ngrok-free.app",
+    "https://9d9cc56f9104.ngrok-free.app",
+]
 
 # --- DRF ---
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",  # user JWT
-        "billing.auth.ApiKeyAuthentication",                          # API key for /v1/*
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "billing.auth.ApiKeyAuthentication",
     ],
     "DEFAULT_THROTTLE_CLASSES": [
         "rest_framework.throttling.UserRateThrottle",
@@ -140,23 +120,10 @@ REST_FRAMEWORK = {
     "DEFAULT_THROTTLE_RATES": {"user": "60/min", "anon": "10/min"},
 }
 
+# --- Celery (won't run on Web App unless you provision a worker/Redis) ---
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 
 LOGIN_REDIRECT_URL = "/dashboard/"
-LOGIN_URL = "login" 
+LOGIN_URL = "login"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
-
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://cd3e7c147fe3.ngrok-free.app',
-    'https://9d9cc56f9104.ngrok-free.app',
-    # Add other trusted origins as needed
-]
-
-
-
-CELERY_BROKER_URL = "redis://localhost:6379/0"
-CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
-CELERY_ACCEPT_CONTENT = ["json"]
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-
