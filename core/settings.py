@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     "content",
 ]
 
-
 # --- Middleware (order matters) ---
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -53,6 +52,23 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+]
+
+# ✅ Add the TEMPLATES block here
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [BASE_DIR / 'templates'],   # add your own template folders here if needed
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+            ],
+        },
+    },
 ]
 
 ROOT_URLCONF = "core.urls"
@@ -90,7 +106,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # --- (Optional) Media uploads ---
-# For small apps you can start like this; later move to Azure Blob Storage.
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.getenv("MEDIA_ROOT", "/home/data/media")
 
