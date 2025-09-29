@@ -120,7 +120,7 @@ def start_checkout(request):
         user.stripe_customer_id = cust.id
         user.save(update_fields=["stripe_customer_id"])
 
-    site = request.data.get("site") or "https://9d9cc56f9104.ngrok-free.app"
+    site = request.data.get("site") or "https://djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net"
     success_url = f"{site}/dashboard/?sub=success"
     cancel_url = f"{site}/dashboard/?sub=cancel"
 
