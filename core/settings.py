@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- Security & env (single source of truth) ---
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "devsecret")  # local fallback only
 DEBUG = os.getenv("DEBUG", "0") == "1"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net").split(",")
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TEST_KEY = os.getenv("TEST_KEY", "")
@@ -121,7 +121,7 @@ CSRF_TRUSTED_ORIGINS = [
     # "https://yourappname.azurewebsites.net",
     "https://cd3e7c147fe3.ngrok-free.app",
     "https://9d9cc56f9104.ngrok-free.app",
-    "djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net",
+    "https://djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net",
 ]
 
 # --- DRF ---
