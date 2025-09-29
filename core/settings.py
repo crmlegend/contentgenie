@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "content",
 ]
 
+
 # --- Middleware (order matters) ---
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
