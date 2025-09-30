@@ -99,7 +99,7 @@ urlpatterns = [
     path("v1/generate/content", content_views.generate),
     path("v1/blog/preview", content_views.blog_preview),
     
-    path("dashboard", acc_views.dashboard),
+    path("dashboard", bill_views.dashboard),
     path("profile/update", acc_views.profile_update),
 ]
 
