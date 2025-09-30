@@ -132,17 +132,40 @@ from django.shortcuts import render
 from .models import ApiKey
 
 @login_required
-def dashboard(request):
-    row = (ApiKey.objects
-           .filter(user=request.user, status="active", revoked_at__isnull=True)
-           .order_by("-created_at")
-           .first())
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.db.models import Q
+from .models import ApiKey
 
-    full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}" if row else None
+@login_required
+def dashboard(request):
+    # identifiers we can match on
+    uid_str = str(request.user.id)
+    cust_id = getattr(request.user, "stripe_customer_id", None)
+
+    # Build the OR condition:
+    q = (
+        Q(user=request.user) |
+        Q(tenant_id=uid_str)
+    )
+    if cust_id:
+        q |= Q(customer_id=cust_id) | Q(tenant_id=cust_id)
+
+    row = (
+        ApiKey.objects
+        .filter(q, status="active", revoked_at__isnull=True)
+        .order_by("-created_at")
+        .first()
+    )
+
+    full_key = None
+    if row:
+        # build “raw” key from the two columns you store
+        full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}"
 
     return render(request, "dashboard.html", {
-        "key": row,                 # used by {{ key.plan }} and the API Key "Active" card
-        "raw_api_key": full_key,    # used by the Full Key block
+        "key": row,               # template uses {{ key.plan }} / {% if key %}
+        "raw_api_key": full_key,  # template shows the full key if present
     })
 
 # ---------- Stripe Checkout ----------
