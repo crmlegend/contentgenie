@@ -21,6 +21,9 @@ from django.views.decorators.csrf import csrf_exempt
 import logging, stripe
 from django.conf import settings
 
+
+
+
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY  # sk_test_... or sk_live_...
 
@@ -146,6 +149,10 @@ def start_checkout(request):
     return Response({"url": session.url})
 
 
+
+
+
+
 # ---------- Stripe Webhook ----------
 
 # @csrf_exempt
@@ -189,46 +196,119 @@ def start_checkout(request):
 
 
 
+# @csrf_exempt
+# def stripe_webhook(request):
+#     # 1) Verify signature against the correct secret (TEST vs LIVE!)
+#     payload = request.body
+#     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+#     secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
+
+#     if not secret:
+#         logger.error("STRIPE_WEBHOOK_SECRET not set")
+#         return HttpResponse(status=400)
+
+#     try:
+#         event = stripe.Webhook.construct_event(payload, sig_header, secret)
+#     except ValueError as e:
+#         # Invalid JSON
+#         logger.warning("Invalid payload: %s", e)
+#         return HttpResponse(status=400)
+#     except stripe.error.SignatureVerificationError as e:
+#         # Wrong secret / missing header
+#         logger.warning("Signature verify failed: %s", e)
+#         return HttpResponse(status=400)
+
+#     # 2) Handle only what's needed, keep it FAST
+#     try:
+#         if event["type"] == "checkout.session.completed":
+#             # enqueue if available; if queue fails, just log and ACK
+#             try:
+#                 from .tasks import process_stripe_event  # lazy import
+#                 process_stripe_event.delay(payload.decode("utf-8"))
+#             except Exception as enqueue_err:
+#                 logger.exception("Failed to enqueue webhook task: %s", enqueue_err)
+#                 # optional: persist raw event for later manual processing
+
+#         # handle other events similarly if you need them...
+
+#     except Exception as handler_err:
+#         # Never 500 to Stripe; log instead
+#         logger.exception("Webhook handler error: %s", handler_err)
+
+#     # 3) ALWAYS acknowledge quickly so Stripe stops retrying
+#     return HttpResponse(status=200)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @csrf_exempt
 def stripe_webhook(request):
-    # 1) Verify signature against the correct secret (TEST vs LIVE!)
+    """
+    Verify Stripe signature. On checkout.session.completed, issue API key *inline*.
+    Keep this handler very fast (<10s) so Stripe doesn't retry.
+    """
     payload = request.body
     sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
-    secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
+    secret = settings.STRIPE_WEBHOOK_SECRET
 
-    if not secret:
-        logger.error("STRIPE_WEBHOOK_SECRET not set")
-        return HttpResponse(status=400)
-
+    # 1) Verify the signature
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, secret)
-    except ValueError as e:
-        # Invalid JSON
-        logger.warning("Invalid payload: %s", e)
-        return HttpResponse(status=400)
-    except stripe.error.SignatureVerificationError as e:
-        # Wrong secret / missing header
-        logger.warning("Signature verify failed: %s", e)
+    except Exception as e:
+        logger.warning("webhook verify failed: %s", e)
         return HttpResponse(status=400)
 
-    # 2) Handle only what's needed, keep it FAST
-    try:
-        if event["type"] == "checkout.session.completed":
-            # enqueue if available; if queue fails, just log and ACK
+    evt_type = event.get("type")
+    obj = (event.get("data") or {}).get("object") or {}
+
+    # 2) (Optional) Idempotency: ignore duplicates if Stripe retries
+    # If you have a WebhookEvent table, check event["id"] here and skip if seen.
+
+    # 3) Only issue on successful checkout (you can add more types if you want)
+    if evt_type == "checkout.session.completed":
+        customer_id = obj.get("customer")
+
+        # Try to find the user by customer_id first (you saved it on the user at checkout)
+        user = None
+        if customer_id:
+            user = User.objects.filter(stripe_customer_id=customer_id).first()
+        if not user:
+            # Fallback to email if present
+            email = (obj.get("customer_details") or {}).get("email") or obj.get("customer_email")
+            if email:
+                user = User.objects.filter(email__iexact=email).first()
+
+        if user or customer_id:
             try:
-                from .tasks import process_stripe_event  # lazy import
-                process_stripe_event.delay(payload.decode("utf-8"))
-            except Exception as enqueue_err:
-                logger.exception("Failed to enqueue webhook task: %s", enqueue_err)
-                # optional: persist raw event for later manual processing
+                _issue_key_for_user(
+                    user=user,
+                    customer_id=customer_id,
+                    plan="pro",
+                    make_api_key_func=make_api_key,   # your helper expects this
+                )
+                logger.info("API key issued inline: user=%s customer=%s", 
+                            getattr(user, "id", None), customer_id)
+            except Exception as e:
+                logger.exception("inline key issue failed: %s", e)
+                # Return 200 anyway so Stripe doesn't keep retrying forever
+        else:
+            logger.warning("webhook: no matching user for customer=%s", customer_id)
 
-        # handle other events similarly if you need them...
-
-    except Exception as handler_err:
-        # Never 500 to Stripe; log instead
-        logger.exception("Webhook handler error: %s", handler_err)
-
-    # 3) ALWAYS acknowledge quickly so Stripe stops retrying
+    # 4) Always ACK quickly
     return HttpResponse(status=200)
 
 
