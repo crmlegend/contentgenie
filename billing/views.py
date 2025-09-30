@@ -102,15 +102,12 @@ def _issue_key_for_user(*, user: User | None, customer_id: str | None, plan="pro
 @permission_classes([AllowAny])
 def verify_key(request):
     """
-    POST JSON: {"key":"<raw api key>"}
+    POST: {"key":"<raw api key>"}
     200 -> {"ok": true, "plan": "...", "key_prefix": "..."}
     401 -> {"ok": false}
     """
     raw = (request.data or {}).get("key", "")
     raw = (raw or "").strip()
-
-    if not raw:
-        return Response({"ok": False}, status=401)
 
     row = verify_token_in_db(raw)
     if not row:
