@@ -138,15 +138,11 @@ def dashboard(request):
            .order_by("-created_at")
            .first())
 
-    full_key = None
-    if row:
-        # Build full key from prefix + plain_suffix
-        full_key = f"{row.key_prefix or ''}{row.plain_suffix or ''}"
+    full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}" if row else None
 
     return render(request, "dashboard.html", {
-        "key": row,                        # <-- add this so {{ key.plan }} and {% if key %} work
-        "latest_key_prefix": row.key_prefix if row else None,
-        "raw_api_key": full_key,           # used by the Full Key block
+        "key": row,                 # used by {{ key.plan }} and the API Key "Active" card
+        "raw_api_key": full_key,    # used by the Full Key block
     })
 
 # ---------- Stripe Checkout ----------
