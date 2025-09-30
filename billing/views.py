@@ -24,15 +24,18 @@ from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import logging, stripe
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import ApiKey
 
+from .models import ApiKey, WebhookEvent  # WebhookEvent optional; keep if you log events
+from .utils import make_api_key
 
 
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY  # sk_test_... or sk_live_...
 
-from .models import ApiKey, WebhookEvent  # WebhookEvent optional; keep if you log events
-from .utils import make_api_key
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -129,9 +132,7 @@ def verify_key(request):
 # ---------- Dashboard view ----------
 
 # billing/views.py
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from .models import ApiKey
+
 
 
 @login_required
