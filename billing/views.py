@@ -298,7 +298,7 @@ def stripe_webhook(request):
                     user=user,
                     customer_id=customer_id,
                     plan="pro",
-                    make_api_key_func=make_api_key,   # your helper expects this
+                    # make_api_key_func=make_api_key,   # your helper expects this
                 )
                 logger.info("API key issued inline: user=%s customer=%s", 
                             getattr(user, "id", None), customer_id)
