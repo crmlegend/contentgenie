@@ -13,6 +13,17 @@ from django.http import HttpResponse
 import logging
 import stripe
 
+
+
+
+from django.http import HttpResponse
+from django.views.decorators.csrf import csrf_exempt
+import logging, stripe
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+stripe.api_key = settings.STRIPE_SECRET_KEY  # sk_test_... or sk_live_...
+
 from .models import ApiKey, WebhookEvent  # WebhookEvent optional; keep if you log events
 from .utils import make_api_key
 
@@ -118,7 +129,7 @@ def start_checkout(request):
             metadata={"django_user_id": user.id},
         )
         user.stripe_customer_id = cust.id
-        user.save(update_fields=["stripe_customer_id"])
+        user.save(update_fields=["stripe_customer_id"])    
 
     site = request.data.get("site") or "https://djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net"
     success_url = f"{site}/dashboard/?sub=success"
@@ -137,39 +148,96 @@ def start_checkout(request):
 
 # ---------- Stripe Webhook ----------
 
-@csrf_exempt
-@api_view(["POST"])
-@permission_classes([AllowAny])
-def stripe_webhook(request):
-    """
-    Stripe webhook endpoint: verify signature then enqueue event for background processing.
-    """
-    print("Stripe has sent the webhook")
-    print("Success has occured, webhook hit ")
+# @csrf_exempt
+# @api_view(["POST"])
+# @permission_classes([AllowAny])
+# def stripe_webhook(request):
+#     """
+#     Stripe webhook endpoint: verify signature then enqueue event for background processing.
+#     """
+#     print("Stripe has sent the webhook")
+#     print("Success has occured, webhook hit ")
 
-    # Use raw bytes for signature verification
-    payload_bytes = request.body
-    sig = request.headers.get("Stripe-Signature", "")
+#     # Use raw bytes for signature verification
+#     payload_bytes = request.body
+#     sig = request.headers.get("Stripe-Signature", "")
+
+#     try:
+#         event = stripe.Webhook.construct_event(
+#             payload_bytes, sig, settings.STRIPE_WEBHOOK_SECRET
+#         )
+#     except Exception as e:
+#         # Return the reason to make debugging easier (safe in test/development)
+#         return Response({"detail": str(e)}, status=400)
+
+#     # Helpful log to confirm which event type we got
+#     logger.info("Webhook OK: %s", event.get("type"))
+
+#     # ⬇️ Lazy-import here to avoid circular import at module import time
+#     from .tasks import process_stripe_event
+
+#     # Enqueue the Celery task. Your existing task expects a JSON string.
+#     process_stripe_event.delay(payload_bytes.decode("utf-8"))
+
+#     # Immediately respond to Stripe
+#     return Response({"received": True})
+
+
+
+
+
+
+
+
+@csrf_exempt
+def stripe_webhook(request):
+    # 1) Verify signature against the correct secret (TEST vs LIVE!)
+    payload = request.body
+    sig_header = request.META.get("HTTP_STRIPE_SIGNATURE", "")
+    secret = getattr(settings, "STRIPE_WEBHOOK_SECRET", None)
+
+    if not secret:
+        logger.error("STRIPE_WEBHOOK_SECRET not set")
+        return HttpResponse(status=400)
 
     try:
-        event = stripe.Webhook.construct_event(
-            payload_bytes, sig, settings.STRIPE_WEBHOOK_SECRET
-        )
-    except Exception as e:
-        # Return the reason to make debugging easier (safe in test/development)
-        return Response({"detail": str(e)}, status=400)
+        event = stripe.Webhook.construct_event(payload, sig_header, secret)
+    except ValueError as e:
+        # Invalid JSON
+        logger.warning("Invalid payload: %s", e)
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Wrong secret / missing header
+        logger.warning("Signature verify failed: %s", e)
+        return HttpResponse(status=400)
 
-    # Helpful log to confirm which event type we got
-    logger.info("Webhook OK: %s", event.get("type"))
+    # 2) Handle only what's needed, keep it FAST
+    try:
+        if event["type"] == "checkout.session.completed":
+            # enqueue if available; if queue fails, just log and ACK
+            try:
+                from .tasks import process_stripe_event  # lazy import
+                process_stripe_event.delay(payload.decode("utf-8"))
+            except Exception as enqueue_err:
+                logger.exception("Failed to enqueue webhook task: %s", enqueue_err)
+                # optional: persist raw event for later manual processing
 
-    # ⬇️ Lazy-import here to avoid circular import at module import time
-    from .tasks import process_stripe_event
+        # handle other events similarly if you need them...
 
-    # Enqueue the Celery task. Your existing task expects a JSON string.
-    process_stripe_event.delay(payload_bytes.decode("utf-8"))
+    except Exception as handler_err:
+        # Never 500 to Stripe; log instead
+        logger.exception("Webhook handler error: %s", handler_err)
 
-    # Immediately respond to Stripe
-    return Response({"received": True})
+    # 3) ALWAYS acknowledge quickly so Stripe stops retrying
+    return HttpResponse(status=200)
+
+
+
+
+
+
+
+
 
 
 # ---------- View for API key (dashboard AJAX or API) ----------
