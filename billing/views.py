@@ -13,6 +13,7 @@ from django.http import HttpResponse
 import logging
 import stripe
 from .utils import verify_token_in_db
+from .utils import issue_api_key_for_user, make_api_key
 
 
 
@@ -327,7 +328,7 @@ def stripe_webhook(request):
 
         if user or customer_id:
             try:
-                _issue_key_for_user(
+                issue_api_key_for_user(
                     user=user,
                     customer_id=customer_id,
                     plan="pro",
