@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 import logging
 import stripe
+from .utils import verify_token_in_db
 
 
 
@@ -92,6 +93,37 @@ def _issue_key_for_user(*, user: User | None, customer_id: str | None, plan="pro
         getattr(user, "id", None), customer_id, plan, prefix
     )
     return plain
+
+
+
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def verify_key(request):
+    """
+    POST JSON: {"key":"<raw api key>"}
+    200 -> {"ok": true, "plan": "...", "key_prefix": "..."}
+    401 -> {"ok": false}
+    """
+    raw = (request.data or {}).get("key", "")
+    raw = (raw or "").strip()
+
+    if not raw:
+        return Response({"ok": False}, status=401)
+
+    row = verify_token_in_db(raw)
+    if not row:
+        return Response({"ok": False}, status=401)
+
+    return Response({
+        "ok": True,
+        "plan": row.plan,
+        "key_prefix": row.key_prefix,
+    })
+
+
+
 
 
 # ---------- Dashboard view ----------

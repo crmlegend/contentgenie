@@ -20,6 +20,7 @@ from django.contrib import admin
 # from accounts import views as acc_views
 # from accounts import views as acc
 from django.http import HttpResponse
+from billing.views import verify_key 
 
 
 
@@ -79,6 +80,7 @@ urlpatterns = [
     # path("admin/", admin.site.urls),
 
     # Accounts
+    path("api/key/verify/", verify_key, name="verify_key"),
     path("auth/register", acc_views.register),
     path("auth/login", TokenObtainPairView.as_view()),
     path("auth/refresh", TokenRefreshView.as_view()),
