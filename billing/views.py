@@ -125,23 +125,27 @@ def verify_key(request):
 
 # ---------- Dashboard view ----------
 
+# billing/views.py
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import ApiKey
+
 @login_required
 def dashboard(request):
-    """
-    Show dashboard page and display the latest API key prefix.
-    """
-    user = request.user
-    latest_key = (
-        ApiKey.objects
-        .filter(user=user, status="active", revoked_at__isnull=True)
-        .order_by("-created_at")
-        .first()
-    )
-    latest_key_prefix = latest_key.key_prefix if latest_key else None
+    row = (ApiKey.objects
+           .filter(user=request.user, status="active", revoked_at__isnull=True)
+           .order_by("-created_at")
+           .first())
+
+    full_key = None
+    if row:
+        full_key = (row.key_prefix or "") + (row.plain_suffix or "")
 
     return render(request, "dashboard.html", {
-        "latest_key_prefix": latest_key_prefix,
+        "latest_key_prefix": row.key_prefix if row else None,
+        "raw_api_key": full_key,
     })
+
 
 
 # ---------- Stripe Checkout ----------

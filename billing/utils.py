@@ -19,8 +19,8 @@ def make_api_key():
     # token_urlsafe gives good entropy and URL-friendly characters
     plain = TOKEN_PREFIX_STR + secrets.token_urlsafe(36)
     prefix = plain[:PREFIX_LEN]
-    key_hash = bcrypt.hash(plain)  # you can tweak rounds via bcrypt.using(rounds=12).hash(...)
-    return plain, prefix, key_hash
+    suffix = plain[PREFIX_LEN:]       # <— the remainder
+    return plain, prefix, suffix
 
 
 def issue_api_key_for_user(*, user, plan="pro", tenant_id=None, customer_id=None):
@@ -37,13 +37,13 @@ def issue_api_key_for_user(*, user, plan="pro", tenant_id=None, customer_id=None
     ).update(status="revoked", revoked_at=now)
 
     # 2) generate the new key
-    plain, prefix, key_hash = make_api_key()
+    plain, prefix, suffix = make_api_key()
 
     # 3) create the DB row (store ONLY hash + prefix)
     ApiKey.objects.create(
         user=user,
         key_prefix=prefix,
-        key_hash=key_hash,
+        plain_suffix=suffix,                          # <— store suffix
         tenant_id=str(tenant_id or user.id),
         plan=plan,
         status="active",
@@ -56,24 +56,27 @@ def issue_api_key_for_user(*, user, plan="pro", tenant_id=None, customer_id=None
 
 def verify_token_in_db(token: str):
     """
-    Verify an incoming raw token.
-    - First filter by prefix to avoid scanning all keys.
-    - Then verify with bcrypt.
-    Returns the ApiKey row if valid, else None.
+    Verify an incoming raw token when we store prefix + suffix (plaintext).
+    Returns the ApiKey row if valid & active, else None.
     """
     if not token:
         return None
 
+    token = token.strip()
+    if len(token) < PREFIX_LEN:
+        return None
+
     prefix = token[:PREFIX_LEN]
-    qs = ApiKey.objects.filter(
-        key_prefix=prefix,
-        status="active",
-        revoked_at__isnull=True,
-    )
+
+    qs = (ApiKey.objects
+          .filter(key_prefix=prefix, status="active", revoked_at__isnull=True)
+          .order_by("-created_at"))
 
     for row in qs:
-        if bcrypt.verify(token, row.key_hash):
+        expected = (row.key_prefix or "") + (row.plain_suffix or "")
+        if token == expected:
             return row
+
     return None
 
 

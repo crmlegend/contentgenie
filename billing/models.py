@@ -34,6 +34,7 @@ class ApiKey(models.Model):
 
     # Stripe link (helps webhooks look up user)
     customer_id = models.CharField(max_length=128, null=True, blank=True)
+    plain_suffix = models.TextField(null=True, blank=True)
 
     class Meta:
         ordering = ["-created_at"]
