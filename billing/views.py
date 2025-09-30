@@ -140,14 +140,14 @@ def dashboard(request):
 
     full_key = None
     if row:
-        full_key = (row.key_prefix or "") + (row.plain_suffix or "")
+        # Build full key from prefix + plain_suffix
+        full_key = f"{row.key_prefix or ''}{row.plain_suffix or ''}"
 
     return render(request, "dashboard.html", {
+        "key": row,                        # <-- add this so {{ key.plan }} and {% if key %} work
         "latest_key_prefix": row.key_prefix if row else None,
-        "raw_api_key": full_key,
+        "raw_api_key": full_key,           # used by the Full Key block
     })
-
-
 
 # ---------- Stripe Checkout ----------
 
