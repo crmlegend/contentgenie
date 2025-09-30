@@ -14,6 +14,8 @@ import logging
 import stripe
 from .utils import verify_token_in_db
 from .utils import issue_api_key_for_user, make_api_key
+from django.db.models import Q
+
 
 
 
@@ -131,11 +133,6 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import ApiKey
 
-@login_required
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-from django.db.models import Q
-from .models import ApiKey
 
 @login_required
 def dashboard(request):
