@@ -159,6 +159,7 @@ def dashboard(request):
     if row:
         # build “raw” key from the two columns you store
         full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}"
+        print("Full key for user", request.user.id, "is", full_key)
 
     return render(request, "dashboard.html", {
         "key": row,               # template uses {{ key.plan }} / {% if key %}
