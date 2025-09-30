@@ -137,8 +137,10 @@ from .models import ApiKey
 @login_required
 def dashboard(request):
     # identifiers we can match on
-    uid_str = str(request.user.id)
+    uid_str = request.user.id
     cust_id = getattr(request.user, "stripe_customer_id", None)
+    
+    print(uid_str,cust_id)
 
     # Build the OR condition:
     q = (
