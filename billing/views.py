@@ -138,7 +138,7 @@ def verify_key(request):
 @login_required
 def dashboard(request):
     # identifiers we can match on
-    uid_str = request.user.id
+    uid_str = str(request.user.id)
     cust_id = getattr(request.user, "stripe_customer_id", None)
     
     print(uid_str,cust_id)
@@ -159,6 +159,7 @@ def dashboard(request):
     )
 
     full_key = None
+    ab="RaufAkbar"
     if row:
         # build “raw” key from the two columns you store
         full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}"
@@ -166,7 +167,8 @@ def dashboard(request):
 
     return render(request, "dashboard.html", {
         "key": row,               # template uses {{ key.plan }} / {% if key %}
-        "raw_api_key": full_key,  # template shows the full key if present
+        "raw_api_key": full_key,
+        "cd":ab                    # template shows the full key if present
     })
 
 # ---------- Stripe Checkout ----------
