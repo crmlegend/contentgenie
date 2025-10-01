@@ -202,11 +202,11 @@
             <p class="text-sm text-slate-500 mt-1">Your full API key.</p>
 
             <div class="mt-4 space-y-3">
-              {% if cd %}
+              {% if raw_api_key %}
                 <div class="rounded-xl border border-slate-200 bg-slate-50 p-3">
                   <div class="text-sm text-slate-500 mb-1">Full Key</div>
                   <div class="flex items-center gap-2">
-                    <p id="fullKey" class="text-sm bg-white rounded-lg px-2 py-1 border border-slate-200 break-all">{{ cd }}</p>
+                    <p id="fullKey" class="text-sm bg-white rounded-lg px-2 py-1 border border-slate-200 break-all">{{ raw_api_key }}</p>
                     <button type="button" class="text-xs rounded-lg border border-slate-300 px-2 py-1 hover:bg-slate-100" onclick="copyFullKey()">Copy</button>
                   </div>
                 </div>
