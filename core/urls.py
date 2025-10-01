@@ -90,7 +90,7 @@ urlpatterns = [
     # Billing
     path("v1/billing/checkout", bill_views.start_checkout),  # JWT-protected
     path("webhooks/stripe", bill_views.stripe_webhook),      # public (Stripe calls)
-    # path("billing/", include("billing.urls")),  # billing routes
+    path("billing/", include("billing.urls")),  # billing routes
     path("v1/keys/mine", bill_views.my_key),                 # JWT-protected
     
         # ... your admin/auth/billing routes ...
