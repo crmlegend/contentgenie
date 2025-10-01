@@ -168,7 +168,7 @@ def dashboard(request):
     return render(request, "dashboard.html", {
         "key": row,               # template uses {{ key.plan }} / {% if key %}
         "raw_api_key": full_key,
-        "cd":ab                    # template shows the full key if present
+        "cd": ab                   # template shows the full key if present
     })
 
 # ---------- Stripe Checkout ----------
