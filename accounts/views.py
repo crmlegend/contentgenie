@@ -69,10 +69,69 @@ def me(request):
 # ---------------------------
 # Dashboard (profile + password + api key prefix)
 # ---------------------------
+# @login_required
+# def dashboard(request):
+#     user = request.user
+
+#     profile_form = ProfileForm(instance=user)
+#     pwd_form = DashboardPasswordChangeForm(user=user)
+
+#     if request.method == "POST":
+#         action = request.POST.get("action")
+
+#         if action == "update_profile":
+#             profile_form = ProfileForm(request.POST, instance=user)
+#             if profile_form.is_valid():
+#                 profile_form.save()
+#                 messages.success(request, "Profile updated.")
+#                 return redirect("dashboard")
+
+#         elif action == "change_password":
+#             pwd_form = DashboardPasswordChangeForm(user=user, data=request.POST)
+#             if pwd_form.is_valid():
+#                 pwd_form.save()  # re-hashes and updates password
+#                 messages.success(request, "Password changed.")
+#                 return redirect("dashboard")
+
+#     # Short-lived JWT for client-side calls (if you need it)
+#     access = str(RefreshToken.for_user(user).access_token)
+
+#     # Latest active API key (prefix only)
+#     latest_key = (
+#         ApiKey.objects
+#         .filter(user=user, status="active", revoked_at__isnull=True)
+#         .order_by("-created_at")
+#         .first()
+#     )
+#     latest_key_prefix = latest_key.key_prefix if latest_key else None
+
+#     return render(
+#         request,
+#         "dashboard.html",
+#         {
+#             "access": access,
+#             "profile_form": profile_form,
+#             "pwd_form": pwd_form,
+#             "latest_key_prefix": latest_key_prefix,
+#         },
+#     )
+
+
+
+
+
+
+
+
+
+
+
+
 @login_required
 def dashboard(request):
     user = request.user
 
+    # ----- Profile / password forms -----
     profile_form = ProfileForm(instance=user)
     pwd_form = DashboardPasswordChangeForm(user=user)
 
@@ -89,32 +148,65 @@ def dashboard(request):
         elif action == "change_password":
             pwd_form = DashboardPasswordChangeForm(user=user, data=request.POST)
             if pwd_form.is_valid():
-                pwd_form.save()  # re-hashes and updates password
+                pwd_form.save()
                 messages.success(request, "Password changed.")
                 return redirect("dashboard")
 
-    # Short-lived JWT for client-side calls (if you need it)
+    # ----- Short-lived JWT for your JS calls -----
     access = str(RefreshToken.for_user(user).access_token)
 
-    # Latest active API key (prefix only)
-    latest_key = (
+    # ----- API key lookup (matches your billing view logic) -----
+    uid_str = str(user.id)
+    cust_id = getattr(user, "stripe_customer_id", None)
+
+    q = Q(user=user) | Q(tenant_id=uid_str)
+    if cust_id:
+        q |= Q(customer_id=cust_id) | Q(tenant_id=cust_id)
+
+    key_row = (
         ApiKey.objects
-        .filter(user=user, status="active", revoked_at__isnull=True)
+        .filter(q, status="active", revoked_at__isnull=True)
         .order_by("-created_at")
         .first()
     )
-    latest_key_prefix = latest_key.key_prefix if latest_key else None
 
-    return render(
-        request,
-        "dashboard.html",
-        {
-            "access": access,
-            "profile_form": profile_form,
-            "pwd_form": pwd_form,
-            "latest_key_prefix": latest_key_prefix,
-        },
-    )
+    # Full key only if you actually store a plain suffix
+    full_key = None
+    latest_key_prefix = None
+    if key_row:
+        latest_key_prefix = key_row.key_prefix
+        suffix = getattr(key_row, "plain_suffix", None)
+        if suffix:                           # only build if suffix exists
+            full_key = f"{key_row.key_prefix or ''}{suffix}"
+
+    # ----- Context for your template -----
+    return render(request, "dashboard.html", {
+        "access": access,
+        "profile_form": profile_form,
+        "pwd_form": pwd_form,
+
+        # KPI cards / other blocks
+        "key": key_row,                      # your template already uses {% if key %}...
+        "latest_key_prefix": latest_key_prefix,
+
+        # The block that prints {{ cd }} expects this name:
+        "cd": full_key,                      # will show the full key if available
+        "raw_api_key": full_key,             # optional duplicate, harmless
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 # ---------------------------
