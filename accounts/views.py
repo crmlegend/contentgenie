@@ -15,6 +15,8 @@ from billing.models import ApiKey
 from .serializers import RegisterSerializer
 from .forms import SignUpForm, NiceLoginForm, ProfileForm, DashboardPasswordChangeForm
 from django.contrib.auth import get_user_model
+from django.db.models import Q
+
 
 User = get_user_model()
 
