@@ -135,41 +135,41 @@ def verify_key(request):
 
 
 
-@login_required
-def dashboard(request):
-    # identifiers we can match on
-    uid_str = str(request.user.id)
-    cust_id = getattr(request.user, "stripe_customer_id", None)
+# @login_required
+# def dashboard(request):
+#     # identifiers we can match on
+#     uid_str = str(request.user.id)
+#     cust_id = getattr(request.user, "stripe_customer_id", None)
     
-    print(uid_str,cust_id)
+#     print(uid_str,cust_id)
 
-    # Build the OR condition:
-    q = (
-        Q(user=request.user) |
-        Q(tenant_id=uid_str)
-    )
-    if cust_id:
-        q |= Q(customer_id=cust_id) | Q(tenant_id=cust_id)
+#     # Build the OR condition:
+#     q = (
+#         Q(user=request.user) |
+#         Q(tenant_id=uid_str)
+#     )
+#     if cust_id:
+#         q |= Q(customer_id=cust_id) | Q(tenant_id=cust_id)
 
-    row = (
-        ApiKey.objects
-        .filter(q, status="active", revoked_at__isnull=True)
-        .order_by("-created_at")
-        .first()
-    )
+#     row = (
+#         ApiKey.objects
+#         .filter(q, status="active", revoked_at__isnull=True)
+#         .order_by("-created_at")
+#         .first()
+#     )
 
-    full_key = None
-    ab="RaufAkbar"
-    if row:
-        # build “raw” key from the two columns you store
-        full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}"
-        print("Full key for user", request.user.id, "is", full_key)
+#     full_key = None
+#     ab="RaufAkbar"
+#     if row:
+#         # build “raw” key from the two columns you store
+#         full_key = f"{row.key_prefix or ''}{getattr(row, 'plain_suffix', '')}"
+#         print("Full key for user", request.user.id, "is", full_key)
 
-    return render(request, "dashboard.html", {
-        "key": row,               # template uses {{ key.plan }} / {% if key %}
-        "raw_api_key": full_key,
-        "cd": ab                   # template shows the full key if present
-    })
+#     return render(request, "dashboard.html", {
+#         "key": row,               # template uses {{ key.plan }} / {% if key %}
+#         "raw_api_key": full_key,
+#         "cd": ab                   # template shows the full key if present
+#     })
 
 # ---------- Stripe Checkout ----------
 
