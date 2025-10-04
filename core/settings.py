@@ -11,28 +11,8 @@ SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "devsecret")  # local fallback only
 DEBUG = os.getenv("DEBUG", "0") == "1"
 
 # --- Hosts / proxies ---
-# Base list from env (comma-separated), e.g. ALLOWED_HOSTS="yourapp.azurewebsites.net,example.com"
-ALLOWED_HOSTS = os.getenv(
-    "ALLOWED_HOSTS",
-    "djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net"
-).split(",")
-
-# Clean up any spaces/empties
-ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
-
-# Add Azure’s assigned site hostname if present (e.g. YOURAPP.azurewebsites.net)
-site_host = os.getenv("WEBSITE_HOSTNAME", "")
-if site_host and site_host not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(site_host)
-
-# Add Azure health probe and common local hosts
-for extra in ["169.254.129.2", "localhost", "127.0.0.1", "0.0.0.0"]:
-    if extra not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(extra)
-
-# For local debugging you can allow all (DON'T use in production)
-if DEBUG:
-    ALLOWED_HOSTS = ["*"]
+# Allow ALL hosts (be cautious in production)
+ALLOWED_HOSTS = ["*"]
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TEST_KEY = os.getenv("TEST_KEY", "")
