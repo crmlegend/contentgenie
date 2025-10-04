@@ -78,7 +78,7 @@ urlpatterns = [
     # path("admin/", admin.site.urls),
 
     # Accounts
-    path("api/key/verify/", verify_key, bill_views.verify_key),  # public
+    path("api/key/verify/", bill_views.verify_key, name="api_key_verify"),  # public
     path("auth/register", acc_views.register),
     path("auth/login", TokenObtainPairView.as_view()),
     path("auth/refresh", TokenRefreshView.as_view()),
@@ -94,8 +94,8 @@ urlpatterns = [
     path("v1/keys/mine", bill_views.my_key),                 # JWT-protected
     
         # ... your admin/auth/billing routes ...
-    path("v1/generate/content", content_views.generate),
-    path("v1/blog/preview", content_views.blog_preview),
+    path("v1/generate/content", content_views.generate, name="generate_content"),
+    path("v1/blog/preview", content_views.blog_preview, name="blog_preview"),
     
     # path("dashboard/", bill_views.dashboard),
     path("profile/update", acc_views.profile_update),
