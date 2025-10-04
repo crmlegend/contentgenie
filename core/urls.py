@@ -78,7 +78,7 @@ urlpatterns = [
     # path("admin/", admin.site.urls),
 
     # Accounts
-    path("api/key/verify/", verify_key, name="verify_key"),
+    path("api/key/verify/", verify_key, bill_views.verify_key),  # public
     path("auth/register", acc_views.register),
     path("auth/login", TokenObtainPairView.as_view()),
     path("auth/refresh", TokenRefreshView.as_view()),
