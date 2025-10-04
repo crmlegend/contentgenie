@@ -9,7 +9,30 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # --- Security & env (single source of truth) ---
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "devsecret")  # local fallback only
 DEBUG = os.getenv("DEBUG", "0") == "1"
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net").split(",")
+
+# --- Hosts / proxies ---
+# Base list from env (comma-separated), e.g. ALLOWED_HOSTS="yourapp.azurewebsites.net,example.com"
+ALLOWED_HOSTS = os.getenv(
+    "ALLOWED_HOSTS",
+    "djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net"
+).split(",")
+
+# Clean up any spaces/empties
+ALLOWED_HOSTS = [h.strip() for h in ALLOWED_HOSTS if h.strip()]
+
+# Add Azure’s assigned site hostname if present (e.g. YOURAPP.azurewebsites.net)
+site_host = os.getenv("WEBSITE_HOSTNAME", "")
+if site_host and site_host not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(site_host)
+
+# Add Azure health probe and common local hosts
+for extra in ["169.254.129.2", "localhost", "127.0.0.1", "0.0.0.0"]:
+    if extra not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(extra)
+
+# For local debugging you can allow all (DON'T use in production)
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
 
 ADMIN_TOKEN = os.getenv("ADMIN_TOKEN", "")
 TEST_KEY = os.getenv("TEST_KEY", "")
@@ -54,11 +77,11 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
 ]
 
-# ✅ Add the TEMPLATES block here
+# ✅ Templates
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],   
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -103,8 +126,6 @@ USE_TZ = True
 # --- Static (WhiteNoise) ---
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 
 # replace STATICFILES_STORAGE with this block (keep WhiteNoise middleware as you have)
 STORAGES = {
@@ -112,7 +133,6 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     }
 }
-
 
 # --- (Optional) Media uploads ---
 MEDIA_URL = "/media/"
@@ -154,6 +174,7 @@ LOGIN_REDIRECT_URL = "/dashboard/"
 LOGIN_URL = "login"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
+# --- Logging to console (so Azure Log Stream/Kudu can display it) ---
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
