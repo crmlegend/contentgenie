@@ -186,6 +186,8 @@ def generate(request):
     Generate plain text (mode='replacer') or blog JSON (mode='blog').
     Logs include: cid, site, mode, provider, model, key presence, option sizes, elapsed time.
     """
+    
+    print("Request receieved successfully ")
     cid = _cid(request)
     t0 = time.time()
     try:
