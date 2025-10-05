@@ -95,8 +95,8 @@ urlpatterns = [
     
         # ... your admin/auth/billing routes
         
-    # path("v1/generate/content", content_views.generate, name="generate"),
-    path("v1/elementor/process", content_views.generate, name="generate"),  # Elementor calls this
+    path("v1/generate/content", content_views.generate, name="generate"),
+    # path("v1/elementor/process", content_views.generate, name="generate"),  # Elementor calls this
     # path("/v1/generate/content", content_views.generate, name="generate"),
     # path("v1/generate/content/", content_views.generate, name="generate"),
     # path("/v1/generate/content/", content_views.generate, name="generate"),
