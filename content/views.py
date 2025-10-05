@@ -259,6 +259,7 @@ def blog_preview(request):
     """
     Generate blog preview HTML (same AI path but returns rendered HTML).
     """
+    print("request receieved successfully ")
     cid = _cid(request)
     t0 = time.time()
     try:
