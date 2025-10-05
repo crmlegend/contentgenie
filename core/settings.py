@@ -155,7 +155,7 @@ LOGIN_URL = "login"
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
 # New logging
-# --- Logging to console (so Azure Log Stream/Kudu can display it) ---
+# --- Logging to the console (so Azure Log Stream/Kudu can display it) ---
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
