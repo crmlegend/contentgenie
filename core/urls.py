@@ -95,10 +95,10 @@ urlpatterns = [
     
         # ... your admin/auth/billing routes
         
-    # path("v1/generate/content", content_views.generate, name="generate"),
+    path("v1/generate/content", content_views.generate, name="generate"),
     # path("/v1/generate/content", content_views.generate, name="generate"),
     # path("v1/generate/content/", content_views.generate, name="generate"),
-    path("/v1/generate/content/", content_views.generate, name="generate"),
+    # path("/v1/generate/content/", content_views.generate, name="generate"),
     path("v1/blog/preview", content_views.blog_preview, name="blog_preview"),
     
     # path("dashboard/", bill_views.dashboard),
