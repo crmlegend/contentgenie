@@ -1,0 +1,102 @@
+/* Layout shell */
+.acr-wrap { max-width: 1200px; }
+.acr-page-title { margin: 6px 0 0; font-size: 26px; }
+.acr-page-title span { color: #0ea64b; }
+.acr-page-sub { color: #6b7280; margin: 4px 0 12px; }
+.acr-status { margin: 8px 0 16px; }
+
+.acr-panel{
+  display:grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap:28px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:24px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.02);
+}
+
+/* Steps (left column) */
+.acr-left{ position:relative; }
+
+.acr-steps{ list-style:none; margin:0; padding:0; counter-reset: step; }
+.acr-step{
+  position:relative;
+  padding:22px 0 22px 36px;
+  border-left:2px solid #e5e7eb;
+}
+.acr-step:first-child { padding-top: 8px; }
+.acr-step:last-child  { padding-bottom: 0; }
+
+/* Circle icon */
+.acr-step-circle{
+  position:absolute; left:-15px; top:14px;
+  width:28px; height:28px; border-radius:50%;
+  display:grid; place-items:center;
+  background:#16a34a; color:#fff; font-weight:700; font-size:14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.acr-step-circle--bolt{ background:#22c55e; }
+
+/* Step body */
+.acr-step-body{ max-width:560px; }
+.acr-step-title{ font-size:18px; font-weight:700; margin:0 0 6px; color:#111827; }
+.acr-step-desc{ color:#6b7280; margin:0 0 12px; }
+
+.acr-label{ display:block; margin:8px 0 6px; font-weight:600; }
+.acr-input{
+  width:100%; max-width:420px;
+  height:36px; line-height:36px;
+}
+.acr-actions{ display:flex; gap:10px; margin-top:12px; }
+
+/* Buttons – green primary like 10Web */
+.acr-btn-primary.button-primary{
+  background:#16a34a; border-color:#16a34a;
+  box-shadow:none; text-shadow:none;
+}
+.acr-btn-primary.button-primary:hover{ background:#149145; border-color:#149145; }
+.acr-btn-secondary{ background:#fff; border-color:#cbd5e1; color:#111827; }
+.acr-btn-secondary:hover{ background:#f8fafc; }
+
+/* Ticks under step 2 */
+.acr-ticks{ list-style:none; padding-left:0; margin:10px 0 0; }
+.acr-ticks li{
+  position:relative; padding-left:24px; margin:8px 0; color:#374151;
+}
+.acr-ticks li:before{
+  content:""; position:absolute; left:0; top:2px;
+  width:16px; height:16px; border-radius:3px;
+  background:#22c55e; mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><path fill="white" d="M6.6 11.6L3 8l1.4-1.4 2.2 2.2L11.6 3.8 13 5.2z"/></svg>') no-repeat center / 12px 12px;
+}
+
+/* Right column: image + score badge + benefits card */
+.acr-right{ display:flex; flex-direction:column; gap:18px; align-items:center; }
+.acr-screen{
+  position:relative; width:100%; max-width:420px;
+  background:#f8fafc; border-radius:12px; padding:14px;
+  box-shadow: inset 0 0 0 1px #eef2f7;
+}
+.acr-screen img{ width:100%; height:auto; border-radius:8px; display:block; }
+
+.acr-score{
+  position:absolute; right:-18px; bottom:-18px;
+  width:80px; height:80px; border-radius:50%;
+  background:#22c55e; color:#fff; display:grid; place-items:center;
+  font-weight:800; font-size:22px;
+  box-shadow: 0 14px 30px rgba(34,197,94,.35);
+}
+
+/* Benefits card */
+.acr-benefits-card{
+  width:100%; max-width:420px; background:#fff; border:1px solid #e5e7eb; border-radius:12px;
+  padding:16px;
+}
+.acr-benefits-card h4{ margin:0 0 10px; font-size:16px; }
+.acr-benefits-card ul{ margin:0; padding-left:18px; }
+
+/* Responsive */
+@media (max-width: 1024px){
+  .acr-panel{ grid-template-columns: 1fr; }
+  .acr-right{ order: -1; }
+}

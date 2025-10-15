@@ -1,0 +1,411 @@
+/* ========= Base ========= */
+.acr-container {
+  max-width: 1100px;
+  margin-top: 20px;
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+.acr-form-group { margin-bottom: 20px; }
+.acr-form-group label { display:block; margin-bottom:8px; font-weight:600; }
+
+/* Controls */
+.acr-form-group select,
+.acr-form-group textarea,
+.acr-form-group input[type="text"],
+.acr-form-group input[type="search"],
+.acr-form-group input[type="url"],
+.acr-form-group input[type="email"] {
+  width:100%;
+  padding:12px;
+  border:1px solid #cfd7de;
+  border-radius:8px;
+  box-sizing:border-box;
+  background:#fff;
+}
+.acr-form-group textarea { min-height:140px; resize:vertical; }
+
+.acr-button, .button.button-primary {
+  background:#2271b1; color:#fff; border:none; padding:10px 18px; border-radius:8px;
+  cursor:pointer; font-size:14px; line-height:1; transition:transform .05s, box-shadow .2s, filter .2s;
+}
+.acr-button:hover, .button.button-primary:hover { filter:brightness(.95); }
+.acr-button:active, .button.button-primary:active { transform: translateY(1px); }
+.acr-button:disabled, .button.button-primary:disabled { background:#9fb4c6; cursor:not-allowed; }
+.acr-spinner { display:none; vertical-align:middle; margin-left:10px; }
+.acr-container .notice { display:none; margin-top:15px; }
+
+/* Light page tint */
+.wrap.acr-container { padding-top:8px; }
+.wrap.acr-container h1 { margin: 0 0 14px; }
+body.wp-admin #wpbody-content { background:#f4f6f8; }
+
+/* ========= Wizard shell ========= */
+.acr-wizard { max-width:1100px; margin:0 auto; }
+.acr-step-panel {
+  background:#fff; padding:22px; border-radius:12px;
+  box-shadow:0 2px 10px rgba(31,41,55,.06);
+  margin-bottom:18px;
+}
+.acr-subtitle { margin:0 0 12px; font-weight:600; color:#1f2937; }
+.acr-nav { display:flex; gap:10px; justify-content:flex-end; margin-top:14px; }
+
+/* ========= Stepper with connecting line ========= */
+.acr-steps{
+  position:relative; display:flex; gap:24px; align-items:center;
+  margin:10px 0 24px; padding:18px 8px;
+  background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(31,41,55,.06);
+}
+.acr-steps:before{
+  content:""; position:absolute; top:50%; left:60px; right:60px; height:2px;
+  background:#e5e9ef; transform:translateY(-50%); z-index:0;
+}
+.acr-step{ position:relative; text-align:center; flex:1; z-index:1; color:#5b6b7b; opacity:.8; }
+.acr-step.active, .acr-step.done{ opacity:1; color:#111827; }
+.acr-step span{
+  display:inline-flex; width:36px; height:36px; border-radius:50%; align-items:center; justify-content:center;
+  font-weight:700; border:2px solid #cfd7de; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.04);
+}
+.acr-step.active span{ border-color:#2271b1; }
+.acr-step.done span{ background:#2271b1; color:#fff; border-color:#2271b1; }
+.acr-step p{ margin:.45rem 0 0; font-weight:600; font-size:13px; }
+
+/* ========= Cards for step 1 ========= */
+.acr-cards{
+  display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:18px; margin-top:2px;
+}
+.acr-card{ cursor:pointer; }
+.acr-card input{ display:none; }
+.acr-card .acr-card-body{
+  background:#fff; border:1px solid #e6e9ee; border-radius:16px;
+  padding:22px 20px; box-shadow:0 2px 12px rgba(31,41,55,.08);
+  transition: box-shadow .2s, border-color .2s, transform .06s;
+}
+.acr-card .acr-card-icon{ font-size:30px; line-height:1; margin-bottom:12px; }
+.acr-card h3{ margin:6px 0 4px; font-size:20px; color:#111827; }
+.acr-card p{ margin:0; color:#5b6b7b; }
+.acr-card:hover .acr-card-body{ transform:translateY(-1px); box-shadow:0 6px 18px rgba(31,41,55,.12); }
+.acr-card input:checked + .acr-card-body{ border-color:#2271b1; box-shadow:0 6px 18px rgba(34,113,177,.18); }
+
+/* Full width controls */
+#acr-page-select, #acr-blog-select, #acr-ai-prompt{ width:100%; }
+
+/* ========= Notices ========= */
+.notice.notice-info    { display:block; border-left-color:#2271b1; }
+.notice.notice-success { display:block; border-left-color:#2da44e; }
+.notice.notice-error   { display:block; border-left-color:#d63638; }
+.notice { animation: acr-fade-in .2s ease-in; }
+@keyframes acr-fade-in { from { opacity:0 } to { opacity:1 } }
+
+/* ========= Focus styles ========= */
+/* Inputs/selects/textarea: single border (no extra outline/glow) */
+#acr-page-select:focus,
+#acr-blog-select:focus,
+#acr-ai-prompt:focus,
+#acr-new-title:focus,
+.acr-form-group input[type="text"]:focus,
+.acr-form-group input[type="search"]:focus,
+.acr-form-group input[type="url"]:focus,
+.acr-form-group input[type="email"]:focus,
+.acr-form-group textarea:focus,
+.acr-form-group select:focus {
+  outline: none;
+  border-color: #2271b1;
+  box-shadow: none !important; /* override WP admin ring */
+}
+
+/* Keep an accessible outline for non-input focusable elements */
+.acr-card-body:focus-visible,
+.acr-step-panel :focus-visible:not(input):not(textarea):not(select) {
+  outline: 2px solid #2271b1;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* ========= Responsive ========= */
+@media (max-width: 640px){
+  .acr-steps { padding:14px 6px; gap:14px; }
+  .acr-step p { font-size:12px; }
+  .acr-step span { width:32px; height:32px; }
+  .acr-step-panel { padding:16px; }
+}
+
+/* === Full-page overlay loader === */
+#acr-overlay.acr-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;                  /* hidden by default */
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.36); /* subtle dark tint */
+  z-index: 99999;                 /* above WP admin UI */
+}
+#acr-overlay.acr-overlay.show { display: flex; }
+#acr-overlay .acr-overlay-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 22px 26px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+/* spinner inside overlay — override global .acr-spinner: display:none */
+#acr-overlay .acr-spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #2271b1;
+  border-radius: 50%;
+  animation: acr-spin 1s linear infinite;
+}
+/* message under spinner */
+#acr-overlay .acr-msg {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+/* prevent background scroll while overlay is visible */
+body.acr-no-scroll { overflow: hidden !important; }
+
+@keyframes acr-spin { to { transform: rotate(360deg); } }
+
+/* ===================================================== */
+/* =============== Success Popup (NEW) ================= */
+/* ===================================================== */
+
+.acr-success-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(17,24,39,.35);
+  z-index: 100000;                 /* above loader */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s ease;
+}
+.acr-success-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.acr-success-modal {
+  position: relative;
+  width: 520px;
+  max-width: calc(100vw - 32px);
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 12px 40px rgba(0,0,0,.18);
+  padding: 20px 22px 22px;
+  font-family: inherit;
+}
+
+.acr-close-x {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  color: #6b7280;
+}
+.acr-close-x:hover { color:#111827; }
+
+.acr-success-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.acr-success-icon {
+  width: 28px; height: 28px; line-height: 28px;
+  border-radius: 50%;
+  text-align: center;
+  background: #e8f3ff;
+  color: #2271b1;
+  font-weight: 700;
+  display: inline-block;
+}
+
+.acr-success-title {
+  margin: 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.acr-success-message {
+  margin: 8px 0 16px;
+  color: #111827;
+}
+
+.acr-success-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* Button alignment/size inside popup (reuses WP button styles) */
+.acr-success-actions .button { min-width: 120px; }
+@media (max-width:480px){
+  .acr-success-modal { padding:16px; }
+  .acr-success-actions { flex-direction: column; align-items: stretch; }
+  .acr-success-actions .button { width:100%; }
+}
+
+/* ===================================================== */
+/* =============== NEW: Top Feature Tabs =============== */
+/* ===================================================== */
+
+.acr-tabs {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 16px;
+}
+
+.acr-tabs .acr-tab {
+  appearance: none;
+  border: 1px solid #e6e9ee;
+  background: #fff;
+  color: #111827;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: box-shadow .2s, border-color .2s, background .2s;
+}
+
+.acr-tabs .acr-tab:hover {
+  box-shadow: 0 4px 12px rgba(31,41,55,.10);
+}
+
+.acr-tabs .acr-tab.active {
+  border-color: #2271b1;
+  background: #e8f3ff;
+  color: #0f172a;
+}
+
+/* Inactive flow is hidden via [hidden]; enforce for old browsers */
+.acr-flow[hidden] { display: none !important; }
+
+/* Keep each tab content consistent with the wizard shell */
+.acr-flow .acr-step-panel { margin-top: 0; }
+
+/* ===================================================== */
+/* ========== NEW: Inner Mode Tabs (AI/Simple) ========= */
+/* ===================================================== */
+
+.acr-mode-tabs {
+  display: inline-flex;
+  gap: 6px;
+  background: #f3f6f9;
+  padding: 6px;
+  border-radius: 12px;
+  margin: 8px 0 14px;
+}
+
+.acr-mode-tabs .acr-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: #374151;
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.acr-mode-tabs .acr-tab:hover { background: rgba(0,0,0,.04); }
+
+.acr-mode-tabs .acr-tab.active {
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(31,41,55,.08);
+  color: #111827;
+}
+
+/* Utilities used by JS to toggle panels */
+.block  { display: block !important; }
+.hidden { display: none !important; }
+
+/* ===================================================== */
+/* ===== NEW: Blog Creator (tab #2) field widths ======= */
+/* ===================================================== */
+
+#acr2-title,
+#acr2-prompt,
+#acr2-template,
+#acr2-category {
+  width: 100%;
+}
+
+#acr2-prompt { min-height: 140px; }
+
+/* Editor framing in Blog tab */
+#acr-tab-blog .acr-wordpad-wrap .wp-editor-wrap {
+  border: 1px solid #e6e9ee;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* ===================================================== */
+/* === NEW: Generic overlay class (both tabs use it) === */
+/* ===================================================== */
+
+.acr-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(17, 24, 39, 0.36);
+  z-index: 99999;
+}
+.acr-overlay.show { display: flex; }
+
+.acr-overlay .acr-overlay-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  padding: 22px 26px;
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+.acr-overlay .acr-spinner {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e5e7eb;
+  border-top-color: #2271b1;
+  border-radius: 50%;
+  animation: acr-spin 1s linear infinite;
+}
+
+.acr-overlay .acr-msg {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+
+/* ===================================================== */
+/* ========= Stepper tweaks for Blog tab (minor) ======= */
+/* ===================================================== */
+#acr-tab-blog .acr-steps { margin-top: 8px; }
+
+/* ===================================================== */
+/* ================= Small responsive tweaks =========== */
+/* ===================================================== */
+@media (max-width: 640px){
+  .acr-tabs { flex-wrap: wrap; }
+  .acr-tabs .acr-tab { flex: 1 1 auto; text-align: center; }
+}
