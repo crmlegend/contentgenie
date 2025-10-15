@@ -28,7 +28,7 @@ if ( ! defined( 'ACR_PLUGIN_URL' ) ) define( 'ACR_PLUGIN_URL', plugin_dir_url( _
  */
 if ( ! defined( 'ACR_WEBAPP_URL' ) )
     // define( 'ACR_WEBAPP_URL', 'https://djangosubscriptionpanel-app-e8cxfagthcf5emga.canadacentral-01.azurewebsites.net');
-    define( 'ACR_WEBAPP_URL', 'https://193edd64fb8d.ngrok-free.app/');
+    define( 'ACR_WEBAPP_URL', 'https://contentaiseo.com/');
 
 /**
  * Base API for your server (used by the remote client for content ops, if needed).
