@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: ContentAISEO – AI Content Replacer
+ * Plugin Name: ContentAISEO
  * Description: Rewrite existing Elementor pages/posts and generate new AI blog posts. Connects to your Django backend.
  * Version: 1.0.0
  * Author: Ahmad Rohullah
